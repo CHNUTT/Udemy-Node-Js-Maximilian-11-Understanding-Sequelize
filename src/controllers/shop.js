@@ -18,11 +18,18 @@ const getProduct = async (req, res, next) => {
   const { productId } = req.params;
   if (!productId) throw new Error('Product id is missing');
   try {
-    const [[row], ..._] = await Product.findById(productId);
+    const product = await Product.findByPk(productId);
+    const [product2, ..._] = await Product.findAll({
+      where: { id: productId },
+    });
+    console.log(product2);
+    if (!product) {
+      throw new Error(`Can't find the product`);
+    }
     res.render('shop/product-detail', {
-      pageTitle: `Product detail | ${row.title} `,
-      path: `product/${row.id}`,
-      product: row,
+      pageTitle: `Product detail | ${product.title} `,
+      path: `product/${product.id}`,
+      product,
     });
   } catch (err) {
     console.error(err);
