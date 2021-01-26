@@ -12,8 +12,14 @@ const getAddProduct = (req, res, next) => {
 const postAddProduct = async (req, res, next) => {
   try {
     const { title, imageUrl, price, description } = req.body;
-    const product = new Product(null, title, imageUrl, price, description);
-    const respose = await product.save();
+    console.log(title, imageUrl, price, description);
+    const result = await Product.create({
+      title,
+      price,
+      imageUrl,
+      description,
+    });
+    console.log(result);
     res.redirect('/');
   } catch (err) {
     console.error(err);

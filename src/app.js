@@ -2,13 +2,12 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const { join } = require('path');
 const rootDir = require('./util/path');
-const expressHbs = require('express-handlebars');
 
 // Load routes
 const adminRoutes = require('./routes/admin.routes');
 const shopRoutes = require('./routes/shop.routes');
 const errorControllers = require('./controllers/error');
-const db = require('./util/database');
+const sequelize = require('./util/database');
 
 const app = express();
 
@@ -28,6 +27,16 @@ app.use(shopRoutes);
 
 app.use(errorControllers.get404);
 
-app.listen(3000, () => {
-  console.log(`Server is listening on port 3000`);
-});
+const init = async () => {
+  try {
+    const result = await sequelize.sync();
+    // console.log(result);
+    app.listen(3000, () => {
+      console.log(`Server is listening on port 3000`);
+    });
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+init();
