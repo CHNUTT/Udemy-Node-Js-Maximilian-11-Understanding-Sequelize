@@ -3,9 +3,9 @@ const Cart = require('../models/cart');
 
 const getProducts = async (req, res, next) => {
   try {
-    const [rows, fieldData] = await Product.fetchAll();
+    const products = await Product.findAll();
     res.render('shop/product-list', {
-      prods: rows,
+      prods: products,
       path: '/products',
       pageTitle: 'All Products',
     });
@@ -64,9 +64,9 @@ const postDeleteItemFromCart = (req, res, next) => {
 
 const getIndex = async (req, res, next) => {
   try {
-    const [rows, fieldData] = await Product.fetchAll();
+    const products = await Product.findAll();
     res.render('shop/index', {
-      prods: rows,
+      prods: products,
       pageTitle: 'Shop',
       path: '/',
     });
