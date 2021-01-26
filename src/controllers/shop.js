@@ -37,20 +37,23 @@ const getProduct = async (req, res, next) => {
   }
 };
 
-const getCart = (req, res, next) => {
-  Cart.getCart((cart) => {
-    Product.fetchAll((products) => {
-      const cartProducts = cart.products.map(({ id, qty }) => ({
-        productData: products.find((prod) => prod.id === id),
-        qty,
-      }));
-      res.render('shop/cart', {
-        pageTitle: 'Your Cart',
-        path: '/cart',
-        products: cartProducts,
-      });
-    });
-  });
+const getCart = async (req, res, next) => {
+  console.dir(req.user.__proto__);
+  const cart = await req.user.getCart();
+  console.log(cart);
+  // Cart.getCart((cart) => {
+  //   Product.fetchAll((products) => {
+  //     const cartProducts = cart.products.map(({ id, qty }) => ({
+  //       productData: products.find((prod) => prod.id === id),
+  //       qty,
+  //     }));
+  //     res.render('shop/cart', {
+  //       pageTitle: 'Your Cart',
+  //       path: '/cart',
+  //       products: cartProducts,
+  //     });
+  //   });
+  // });
 };
 
 const postCart = (req, res, next) => {

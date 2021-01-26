@@ -12,6 +12,8 @@ const errorControllers = require('./controllers/error');
 const sequelize = require('./util/database');
 const Product = require('./models/product');
 const User = require('./models/user');
+const Cart = require('./models/cart');
+const CartItem = require('./models/cart-item');
 
 const app = express();
 
@@ -47,6 +49,17 @@ const init = async () => {
     Product.belongsTo(User, { constraints: true, onDelete: 'CASCADE' });
     User.hasMany(Product);
 
+    // ? Create realtionship cart 1->1 user
+    // p.s.: if user is deleted cart will be deleted
+    Cart.belongsTo(User, { constraints: true, onDelete: 'CASCADE' });
+
+    // ? Create relationship user has one cart
+    User.hasOne(Cart);
+
+    // ? Create relationship
+    Cart.belongsToMany(Product, { through: CartItem });
+    Product.belongsToMany(Cart, { through: CartItem });
+
     // const result = await sequelize.sync({ force: true });
     const result = await sequelize.sync();
     if (!result) throw new Error('Error on sequelize');
@@ -58,6 +71,7 @@ const init = async () => {
     // console.log(user);
 
     app.listen(3000, () => {
+      console.log(`--------------------------------`);
       console.log(`Server is listening on port 3000`);
     });
   } catch (err) {
