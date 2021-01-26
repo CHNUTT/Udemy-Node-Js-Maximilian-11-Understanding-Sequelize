@@ -20,61 +20,75 @@ const postAddProduct = async (req, res, next) => {
       description,
     });
     console.log(result);
-    res.redirect('/');
+    res.redirect('/admin/products');
   } catch (err) {
     console.error(err);
   }
 };
 
-const getAdminEditProduct = (req, res, next) => {
+const getAdminEditProduct = async (req, res, next) => {
   const { edit: editMode } = req.query;
-  if (!editMode) return res.redirect('/');
+  if (!editMode) {
+    res.redirect('/');
+    throw new Error('No edit mode defined');
+  }
   const { productId } = req.params;
-  Product.findById(productId, (product) => {
-    if (!product) return res.redirect('/');
-
+  try {
+    const product = await Product.findByPk(productId);
     res.render('admin/edit-product', {
       pageTitle: 'Admin | Edit Product',
       path: '/admin/edit-product',
       editing: editMode,
       product,
     });
-  });
+  } catch (err) {
+    console.error(err);
+  }
 };
 
-const postEditProduct = (req, res, next) => {
-  const {
-    productId,
-    title: updatedTitle,
-    price: updatedPrice,
-    imageUrl: updatedImageUrl,
-    description: updatedDescription,
-  } = req.body;
-  const updatedProduct = new Product(
-    productId,
-    updatedTitle,
-    updatedImageUrl,
-    updatedPrice,
-    updatedDescription
-  );
-  updatedProduct.save();
-  res.redirect('/admin/products');
+const postEditProduct = async (req, res, next) => {
+  const { productId: id, title, price, imageUrl, description } = req.body;
+  if (!id || !title || !price | !imageUrl || !description) {
+    throw new Error('Data is missing');
+  }
+  try {
+    const updatedProduct = await Product.update(
+      { title, price, imageUrl, description },
+      { returning: true, where: { id: id } }
+    );
+    res.redirect('/admin/products');
+  } catch (err) {
+    console.error(err);
+  }
 };
 
-const postDeleteProduct = (req, res, next) => {
+const postDeleteProduct = async (req, res, next) => {
   const { productId } = req.params;
-  Product.deleteProduct(productId);
-  res.redirect('/admin/products');
+  if (!productId) {
+    throw new Error('Unable to find the product related to that id');
+  }
+  try {
+    const result = await Product.destroy({
+      returning: true,
+      where: { id: productId },
+    });
+    res.redirect('/admin/products');
+  } catch (err) {
+    console.error(err);
+  }
 };
 
-const getAdminProducts = (req, res, next) => {
-  Product.fetchAll((products) => {
+const getAdminProducts = async (req, res, next) => {
+  try {
+    const products = await Product.findAll();
     res.render('admin/products', {
       prods: products,
       pageTitle: 'Admin | Products',
       path: '/admin/admin-products',
     });
-  });
+  } catch (err) {
+    console.error(err);
+  }
 };
 
 module.exports = {
