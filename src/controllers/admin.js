@@ -13,12 +13,24 @@ const postAddProduct = async (req, res, next) => {
   try {
     const { title, imageUrl, price, description } = req.body;
     console.log(title, imageUrl, price, description);
-    const result = await Product.create({
+    /**
+     * TOPIC: from what we set up the Association in app.js defined products belong to user
+     * ? therefore sequelize created method to create that associate object automatically so we have createProduct() method attached to the object as prototype method to use
+     */
+    const result = await req.user.createProduct({
       title,
       price,
       imageUrl,
       description,
     });
+    // p.s.: nomal methond
+    // const result = await Product.create({
+    //   title,
+    //   price,
+    //   imageUrl,
+    //   description,
+    //   userId: req.user.id,
+    // });
     console.log(result);
     res.redirect('/admin/products');
   } catch (err) {
