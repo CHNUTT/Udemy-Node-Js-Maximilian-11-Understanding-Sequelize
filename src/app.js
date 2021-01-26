@@ -7,7 +7,11 @@ const rootDir = require('./util/path');
 const adminRoutes = require('./routes/admin.routes');
 const shopRoutes = require('./routes/shop.routes');
 const errorControllers = require('./controllers/error');
+
+// Load Database
 const sequelize = require('./util/database');
+const Product = require('./models/product');
+const User = require('./models/user');
 
 const app = express();
 
@@ -29,8 +33,11 @@ app.use(errorControllers.get404);
 
 const init = async () => {
   try {
-    const result = await sequelize.sync();
-    // console.log(result);
+    Product.belongsTo(User, { constraints: true, onDelete: 'CASCADE' });
+    User.hasMany(Product);
+
+    const result = await sequelize.sync({ force: true });
+    if (!result) throw new Error('Error on sequelize');
     app.listen(3000, () => {
       console.log(`Server is listening on port 3000`);
     });
