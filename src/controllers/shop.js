@@ -38,37 +38,74 @@ const getProduct = async (req, res, next) => {
 };
 
 const getCart = async (req, res, next) => {
-  console.dir(req.user.__proto__);
+  try {
+    // TODO 1) Get current user cart
+    const cart = await req.user.getCart();
+
+    // TODO 2) Get all products from the cart
+    const cartProducts = await cart.getProducts();
+
+    // TODO 3) Pass cartProducts into view to render
+    res.render('shop/cart', {
+      pageTitle: 'Your Cart',
+      path: '/cart',
+      products: cartProducts,
+    });
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const postCart = async (req, res, next) => {
+  // TODO 1) Get product id
+  const { productId } = req.body;
+  let newQty = 1;
+
+  try {
+    // TODO 2) Check if the product existed
+    const product = await Product.findByPk(productId);
+    if (!product) throw new Error(`Invalid product id`);
+
+    // TODO 3) Get the current user cart
+    const cart = await req.user.getCart();
+
+    // TODO 4) Check if the adding product is alread existed in the cart
+    const [existingProduct, ..._] = await cart.getProducts({
+      where: { id: productId },
+    });
+
+    if (existingProduct) {
+      // TODO 4.1 if it is in the cart
+      const oldQuantity = existingProduct.cartItem.quantity;
+      newQty = oldQuantity + 1;
+    }
+    // TODO 4.2) if it not add it into the cart and give the quantity to 1
+    const result = await cart.addProduct(product, {
+      through: { quantity: newQty },
+    });
+
+    res.redirect('/cart');
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const postDeleteItemFromCart = async (req, res, next) => {
+  // TODO 1) Get product id from body
+  const { productId } = req.body;
+
+  // TODO 2) Get current user cart
   const cart = await req.user.getCart();
-  console.log(cart);
-  // Cart.getCart((cart) => {
-  //   Product.fetchAll((products) => {
-  //     const cartProducts = cart.products.map(({ id, qty }) => ({
-  //       productData: products.find((prod) => prod.id === id),
-  //       qty,
-  //     }));
-  //     res.render('shop/cart', {
-  //       pageTitle: 'Your Cart',
-  //       path: '/cart',
-  //       products: cartProducts,
-  //     });
-  //   });
-  // });
-};
+  if (!cart) return;
 
-const postCart = (req, res, next) => {
-  const { productId } = req.body;
-  Product.findById(productId, (product) => {
-    Cart.addProduct(productId, product.price);
-    res.redirect('/products');
+  // TODO 3) Query the cart to get the item match the deleting item by id
+  const [deletingItem, ..._] = await cart.getProducts({
+    where: { id: productId },
   });
-};
+  if (!deletingItem) return;
 
-const postDeleteItemFromCart = (req, res, next) => {
-  const { productId } = req.body;
-  Product.findById(productId, (product) => {
-    Cart.removeProduct(productId, product.price);
-  });
+  // TODO 4) Delete item from the junction table (cartItem table)
+  await deletingItem.cartItem.destroy();
   res.redirect('/cart');
 };
 

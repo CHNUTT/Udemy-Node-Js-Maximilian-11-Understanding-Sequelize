@@ -1,19 +1,25 @@
 <%- include('../includes/head.ejs') %>
+  <link rel="stylesheet" href="/css/cart.css">
   </head>
 
   <body>
     <%- include('../includes/navigation.ejs') %>
       <main>
         <% if (products.length> 0) { %>
-          <ul>
-            <% products.forEach(({productData, qty})=> { %>
-              <li>
-                <p>
-                  <%= productData.title %>(<%= qty %>)
-                </p>
+          <ul class="cart__item-list">
+            <!-- ? when access Cart from sequelize, which has Many-To-Many relationship to Products -->
+            <!-- ? it provides access to the junction table i.e. cartItem table as a property of the cart instant  -->
+            <% products.forEach(({title, id, cartItem:{quantity}})=> { %>
+              <li class="cart__item">
+                <h1>
+                  <%= title %>
+                </h1>
+                <h2>
+                  Quantity: <%= quantity %>
+                </h2>
                 <form action="/cart-delete-item" method="POST">
-                  <input type="hidden" name="productId" value="<%= productData.id %>">
-                  <button class="btn" type="submit">Delete</button>
+                  <input type="hidden" name="productId" value="<%= id %>">
+                  <button class="btn danger" type="submit">Delete</button>
                 </form>
               </li>
               <% }) %>

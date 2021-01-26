@@ -68,7 +68,7 @@ const init = async () => {
       (await User.findByPk(1)) ||
       (await User.create({ name: 'Cheer', email: '1@1.com' }));
 
-    // console.log(user);
+    const cart = (await user.getCart()) || (await user.createCart());
 
     app.listen(3000, () => {
       console.log(`--------------------------------`);
