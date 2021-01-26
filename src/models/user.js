@@ -17,13 +17,13 @@ const User = sequelize.define('user', {
     allowNull: false,
     unique: true,
   },
-  password: {
-    type: Sequelize.STRING,
-    allowNull: false,
-    validate: {
-      min: 4,
-    },
-  },
+  // password: {
+  //   type: Sequelize.STRING,
+  //   allowNull: false,
+  //   validate: {
+  //     min: 4,
+  //   },
+  // },
 });
 
 module.exports = User;
