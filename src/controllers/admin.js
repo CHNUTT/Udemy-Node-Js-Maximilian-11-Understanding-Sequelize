@@ -46,7 +46,11 @@ const getAdminEditProduct = async (req, res, next) => {
   }
   const { productId } = req.params;
   try {
-    const product = await Product.findByPk(productId);
+    console.dir(req.user.__proto__);
+    // const product = await Product.findByPk(productId);
+    const [product, ..._] = await req.user.getProducts({
+      where: { id: productId },
+    });
     res.render('admin/edit-product', {
       pageTitle: 'Admin | Edit Product',
       path: '/admin/edit-product',
@@ -92,7 +96,8 @@ const postDeleteProduct = async (req, res, next) => {
 
 const getAdminProducts = async (req, res, next) => {
   try {
-    const products = await Product.findAll();
+    // const products = await Product.findAll();
+    const products = await req.user.getProducts();
     res.render('admin/products', {
       prods: products,
       pageTitle: 'Admin | Products',
