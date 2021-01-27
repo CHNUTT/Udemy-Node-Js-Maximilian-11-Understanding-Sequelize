@@ -23,6 +23,9 @@
                 </form>
               </li>
               <% }) %>
+              <form class="cart__checkout" action="/orders" method="POST">
+                <button class="btn" type="submit">Checkout</button>
+              </form>
           </ul>
           <% } else { %>
             <h1>No Product in Cart!</h1>

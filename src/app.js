@@ -14,6 +14,8 @@ const Product = require('./models/product');
 const User = require('./models/user');
 const Cart = require('./models/cart');
 const CartItem = require('./models/cart-item');
+const Order = require('./models/order');
+const OrderItem = require('./models/order-item');
 
 const app = express();
 
@@ -45,20 +47,31 @@ app.use(errorControllers.get404);
 
 const init = async () => {
   try {
-    // ? Create relationship user 1->n products
+    // TODO Create relationship user 1<-->n products
     Product.belongsTo(User, { constraints: true, onDelete: 'CASCADE' });
     User.hasMany(Product);
 
-    // ? Create realtionship cart 1->1 user
+    // TODO Create realtionship cart 1<-->1 user
     // p.s.: if user is deleted cart will be deleted
     Cart.belongsTo(User, { constraints: true, onDelete: 'CASCADE' });
 
-    // ? Create relationship user has one cart
+    // TODO Create relationship user has one cart
     User.hasOne(Cart);
 
-    // ? Create relationship
+    // TODO Create relationship cart n <--> n product
     Cart.belongsToMany(Product, { through: CartItem });
     Product.belongsToMany(Cart, { through: CartItem });
+
+    // TODO Create relationship user 1 <--> n order
+    Order.belongsTo(User, {
+      constraints: true,
+      onDelete: 'CASCADE',
+    });
+    User.hasMany(Order);
+
+    // TODO Create relationship order n <--> n product
+    Product.belongsToMany(Order, { through: OrderItem });
+    Order.belongsToMany(Product, { through: OrderItem });
 
     // const result = await sequelize.sync({ force: true });
     const result = await sequelize.sync();

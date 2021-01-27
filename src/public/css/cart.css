@@ -20,3 +20,13 @@
   font-size: 1.2rem;
   margin: 0;
 }
+
+.cart__checkout {
+  width: 100%;
+  margin: 10px auto;
+}
+
+.cart__checkout .btn {
+  width: 100%;
+  margin-top: 2rem;
+}

@@ -129,11 +129,57 @@ const getCheckout = (req, res, next) => {
   });
 };
 
-const getOrders = (req, res, next) => {
+const getOrders = async (req, res, next) => {
+  const orders = await req.user.getOrders({ include: ['products'] });
+  // const products = await orders.getProducts();
+  console.log(orders);
   res.render('shop/orders', {
     pageTitle: 'Orders',
     path: '/orders',
+    orders,
   });
+};
+
+const postOrder = async (req, res, next) => {
+  const user = req.user;
+  if (!user) throw new Error('invalid user');
+  try {
+    // TODO 1) get current user cart
+    const cart = await user.getCart();
+
+    // TODO 2) get Product[] in cart
+    // TODO 2.1) get quntity of the product by cartItem property
+    const cartProducts = await cart.getProducts();
+
+    // TODO 3) Create Order
+    const order = await user.createOrder();
+
+    let price = 0;
+
+    await order.addProducts(
+      cartProducts.map((product) => {
+        const qty = product.cartItem.quantity;
+        price += product.price * qty;
+        product.orderItem = { quantity: qty };
+        return product;
+      })
+    );
+
+    const updatedOrder = await order.update({ price: price });
+    console.log(updatedOrder);
+
+    if (!updatedOrder) {
+      throw new Error('something was wrong');
+    }
+
+    // TODO 4) clear cart
+    const resetedCart = await cart.setProducts(null);
+
+    // TODO 5) redirect to Order page
+    res.redirect('/orders');
+  } catch (err) {
+    console.error(err);
+  }
 };
 
 module.exports = {
@@ -145,4 +191,5 @@ module.exports = {
   getProduct,
   postCart,
   postDeleteItemFromCart,
+  postOrder,
 };
